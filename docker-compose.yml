@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # 数据库服务
+  database:
+    image: mysql:8.0
+    container_name: staffdb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: StaffDB123!@#
+      MYSQL_DATABASE: StaffDB
+      MYSQL_USER: staffuser
+      MYSQL_PASSWORD: StaffUser123!@#
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - staff-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+      interval: 30s
+      start_period: 30s
+
+  # 后端 API 服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: staff-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=database;Port=3306;Database=StaffDB;Uid=staffuser;Pwd=StaffUser123!@#;
+      - JWT__Key=ThisIsAVerySecureKeyForJWTTokenGeneration123!@#
+      - JWT__Issuer=StaffManagementSystem
+      - JWT__Audience=StaffManagementUsers
+      - JWT__ExpiryInMinutes=60
+      - CompanyAccess__AllowedDomains__0=company.com
+      - CompanyAccess__AllowedDomains__1=yourcompany.org
+      - CompanyAccess__AllowedDomains__2=corp.company.com
+      - CompanyAccess__AllowedDomains__3=gmail.com
+      - Email__SmtpServer=smtp.gmail.com
+      - Email__SmtpPort=587
+      - Email__EnableSsl=true
+      - Email__Username=your-email@gmail.com
+      - Email__Password=your-app-password
+      - Email__FromName=Staff Management System
+      - Email__FromEmail=your-email@gmail.com
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - staff-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 30s
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: staff-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - staff-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+      start_period: 10s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  staff-network:
+    driver: bridge
