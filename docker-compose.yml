@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 数据库服务
+  # Database service
   database:
     image: mysql:8.0
     container_name: staffdb
@@ -25,7 +25,7 @@ services:
       interval: 30s
       start_period: 30s
 
-  # 后端 API 服务
+  # Backend API service
   backend:
     build:
       context: ./backend
@@ -65,7 +65,7 @@ services:
       interval: 30s
       start_period: 30s
 
-  # 前端服务
+  # Frontend service
   frontend:
     build:
       context: ./frontend

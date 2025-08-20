@@ -17,7 +17,7 @@ namespace StaffManagementSystem.Services
 
         public JwtService(IConfiguration configuration)
         {
-            // 从 appsettings.json 中读取配置
+            // Read configuration from appsettings.json
             _secretKey = configuration["Jwt:SecretKey"] ?? throw new ArgumentNullException("Jwt:SecretKey");
             _issuer = configuration["Jwt:Issuer"] ?? "StaffManagementSystem";
             _audience = configuration["Jwt:Audience"] ?? "StaffManagementSystemUsers";
@@ -26,7 +26,7 @@ namespace StaffManagementSystem.Services
 
         public string GenerateToken(User user)
         {
-            // 声明信息（Payload）
+            // Claims information (Payload)
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Username),
@@ -37,11 +37,11 @@ namespace StaffManagementSystem.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            // 加密密钥
+            // Encryption key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            // 令牌描述
+            // Token description
             var token = new JwtSecurityToken(
                 issuer: _issuer,
                 audience: _audience,
@@ -49,7 +49,7 @@ namespace StaffManagementSystem.Services
                 expires: DateTime.UtcNow.AddMinutes(_expiryMinutes),
                 signingCredentials: creds);
 
-            // 生成字符串
+            // Generate token string
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

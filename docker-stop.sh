@@ -1,21 +1,21 @@
 #!/bin/bash
 
-echo "🛑 停止员工管理系统 Docker 容器"
-echo "=============================="
+echo "🛑 Stopping Staff Management System Docker Containers"
+echo "===================================================="
 
-# 颜色定义
+# Color definitions
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 停止所有服务
-echo "停止服务..."
+# Stop all services
+echo "Stopping services..."
 docker compose down
 
-# 显示状态
+# Show status
 echo ""
-echo -e "${BLUE}📊 当前状态:${NC}"
+echo -e "${BLUE}📊 Current status:${NC}"
 docker compose ps
 
 echo ""
-echo -e "${GREEN}✅ 所有服务已停止${NC}"
+echo -e "${GREEN}✅ All services have been stopped${NC}"

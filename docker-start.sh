@@ -1,76 +1,76 @@
 #!/bin/bash
 
-echo "🐳 启动员工管理系统 Docker 容器"
-echo "==============================="
+echo "🐳 Starting Staff Management System Docker Containers"
+echo "===================================================="
 
-# 颜色定义
+# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 检查 Docker 是否安装
+# Check if Docker is installed
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Docker 未安装${NC}"
-    echo "请安装 Docker 并确保其正在运行"
+    echo -e "${RED}❌ Docker is not installed${NC}"
+    echo "Please install Docker and ensure it's running"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Docker 已安装${NC}"
+echo -e "${GREEN}✅ Docker is installed${NC}"
 
-# 检查 docker compose 是否可用
+# Check if docker compose is available
 if ! docker compose version &> /dev/null; then
-    echo -e "${RED}❌ Docker Compose 不可用${NC}"
-    echo "请确保安装了 Docker Compose"
+    echo -e "${RED}❌ Docker Compose is not available${NC}"
+    echo "Please ensure Docker Compose is installed"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Docker Compose 可用${NC}"
+echo -e "${GREEN}✅ Docker Compose is available${NC}"
 
-# 检查 Docker 守护进程是否运行
+# Check if Docker daemon is running
 if ! docker info &> /dev/null; then
-    echo -e "${RED}❌ Docker 守护进程未运行${NC}"
-    echo "请启动 Docker 服务"
+    echo -e "${RED}❌ Docker daemon is not running${NC}"
+    echo "Please start Docker service"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Docker 守护进程正在运行${NC}"
+echo -e "${GREEN}✅ Docker daemon is running${NC}"
 
-# 停止并删除现有容器
+# Stop and remove existing containers
 echo ""
-echo -e "${YELLOW}🧹 清理现有容器...${NC}"
+echo -e "${YELLOW}🧹 Cleaning up existing containers...${NC}"
 docker compose down
 
-# 构建并启动服务
+# Build and start services
 echo ""
-echo -e "${YELLOW}🏗️ 构建并启动服务...${NC}"
+echo -e "${YELLOW}🏗️ Building and starting services...${NC}"
 docker compose up --build -d
 
-# 等待服务启动
+# Wait for services to start
 echo ""
-echo -e "${YELLOW}⏳ 等待服务启动...${NC}"
+echo -e "${YELLOW}⏳ Waiting for services to start...${NC}"
 sleep 10
 
-# 检查服务状态
+# Check service status
 echo ""
-echo -e "${BLUE}📊 检查服务状态...${NC}"
+echo -e "${BLUE}📊 Checking service status...${NC}"
 docker compose ps
 
 echo ""
-echo -e "${GREEN}🎉 部署完成！${NC}"
+echo -e "${GREEN}🎉 Deployment complete!${NC}"
 echo ""
-echo -e "${BLUE}📱 访问地址:${NC}"
-echo "   前端: http://localhost"
-echo "   后端 API: http://localhost:5000"
-echo "   数据库: localhost:3306"
+echo -e "${BLUE}📱 Access URLs:${NC}"
+echo "   Frontend: http://localhost"
+echo "   Backend API: http://localhost:5000"
+echo "   Database: localhost:3306"
 echo ""
-echo -e "${BLUE}💡 有用的命令:${NC}"
-echo "   查看日志: docker compose logs -f"
-echo "   停止服务: docker compose down"
-echo "   重启服务: docker compose restart"
+echo -e "${BLUE}💡 Useful commands:${NC}"
+echo "   View logs: docker compose logs -f"
+echo "   Stop services: docker compose down"
+echo "   Restart services: docker compose restart"
 echo ""
 
-# 等待用户按键（可选）
-read -p "按 Enter 键查看实时日志，或 Ctrl+C 退出..."
+# Wait for user input (optional)
+read -p "Press Enter to view real-time logs, or Ctrl+C to exit..."
 docker compose logs -f

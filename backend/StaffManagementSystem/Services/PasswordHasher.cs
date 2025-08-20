@@ -6,24 +6,24 @@ namespace StaffManagementSystem.Services
     public class PasswordHasher
     {
         /// <summary>
-        /// 生成密码哈希和盐
+        /// Generate password hash and salt
         /// </summary>
         public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using var hmac = new HMACSHA512();
-            passwordSalt = hmac.Key; // 随机生成的密钥作为盐
+            passwordSalt = hmac.Key; // Randomly generated key as salt
             passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
         }
 
         /// <summary>
-        /// 验证密码是否正确
+        /// Verify if password is correct
         /// </summary>
         public static bool VerifyPassword(string password, byte[] storedHash, byte[] storedSalt)
         {
-            using var hmac = new HMACSHA512(storedSalt); // 使用原盐
+            using var hmac = new HMACSHA512(storedSalt); // Use original salt
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 
-            // 用逐字节比较代替 SequenceEqual，以防 timing attack
+            // Use byte-by-byte comparison instead of SequenceEqual to prevent timing attacks
             for (int i = 0; i < computedHash.Length; i++)
             {
                 if (computedHash[i] != storedHash[i]) return false;

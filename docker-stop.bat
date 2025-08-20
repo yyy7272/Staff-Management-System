@@ -1,17 +1,17 @@
 @echo off
-echo 🛑 停止员工管理系统 Docker 容器
-echo ==============================
+echo 🛑 Stopping Staff Management System Docker Containers
+echo ====================================================
 
-REM 停止所有服务
-echo 停止服务...
+REM Stop all services
+echo Stopping services...
 docker compose down
 
-REM 显示状态
+REM Show status
 echo.
-echo 📊 当前状态:
+echo 📊 Current status:
 docker compose ps
 
 echo.
-echo ✅ 所有服务已停止
+echo ✅ All services have been stopped
 
 pause

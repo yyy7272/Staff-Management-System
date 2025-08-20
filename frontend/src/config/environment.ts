@@ -2,7 +2,7 @@
 export const environment = {
   // API Configuration  
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || (
-    // 在 Docker 环境中，前端通过 nginx 代理访问后端
+    // In Docker environment, frontend accesses backend through nginx proxy
     typeof window !== 'undefined' && window.location.origin 
       ? `${window.location.origin}/api`
       : 'http://localhost:5000/api'

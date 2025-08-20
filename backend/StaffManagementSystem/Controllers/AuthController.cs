@@ -251,7 +251,7 @@ namespace StaffManagementSystem.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
-        // 工具方法
+        // Utility methods
         
 
         private string CreateJwtToken(User user)
