@@ -36,6 +36,10 @@ namespace StaffManagementSystem.Models
         public string? EmailVerificationToken { get; set; }
         public DateTime? EmailVerificationTokenExpiry { get; set; }
 
+        // Password reset fields
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         // Account status
         public bool IsAccountLocked { get; set; } = false;
         public DateTime? LockedUntil { get; set; }

@@ -64,8 +64,8 @@ namespace StaffManagementSystem.Services
         {
             try
             {
-                var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:5000";
-                var resetLink = $"{baseUrl}/reset-password?token={resetToken}";
+                var frontendUrl = _configuration["AppSettings:FrontendUrl"] ?? "http://localhost:3000";
+                var resetLink = $"{frontendUrl}/reset-password?token={resetToken}&email={Uri.EscapeDataString(email)}";
 
                 var subject = "Password Reset Request - Staff Management System";
                 var body = CreatePasswordResetEmailBody(userName, resetLink);

@@ -1,4 +1,4 @@
-import { Home, Building2, Users, Shield, FileCheck, DollarSign } from "lucide-react";
+import { Home, Building2, Users, Shield, FileCheck, DollarSign, Settings } from "lucide-react";
 
 export const menuItems = [
   { id: "home", name: "Dashboard", icon: Home },
@@ -6,5 +6,6 @@ export const menuItems = [
   { id: "employees", name: "Employees", icon: Users },
   { id: "payroll", name: "Payroll", icon: DollarSign, restricted: true }, // Only for admins/HR
   { id: "permissions", name: "Permissions", icon: Shield },
-  { id: "approval", name: "Approvals", icon: FileCheck }
+  { id: "approval", name: "Approvals", icon: FileCheck },
+  { id: "settings", name: "Settings", icon: Settings }
 ];

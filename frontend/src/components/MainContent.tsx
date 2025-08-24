@@ -4,6 +4,7 @@ import { EmployeesPage } from "./pages/EmployeesPage";
 import { PayrollPage } from "./pages/PayrollPage";
 import { PermissionsPage } from "./pages/PermissionsPage";
 import { ApprovalPage } from "./pages/ApprovalPage";
+import UserSettingsPage from "./pages/UserSettingsPage";
 
 
 interface MainContentProps {
@@ -18,7 +19,7 @@ interface MainContentProps {
 export function MainContent({ activeMenu, setActiveMenu, autoOpenEmployeeCreate, autoOpenDepartmentCreate, onQuickAddEmployee, onQuickAddDepartment }: MainContentProps) {
   // Keep components mounted but hidden to preserve state
   const isActive = (page: string) => activeMenu === page;
-  const defaultToHome = !['home', 'organization', 'employees', 'payroll', 'permissions', 'approval'].includes(activeMenu);
+  const defaultToHome = !['home', 'organization', 'employees', 'payroll', 'permissions', 'approval', 'settings'].includes(activeMenu);
 
   return (
     <>
@@ -39,6 +40,9 @@ export function MainContent({ activeMenu, setActiveMenu, autoOpenEmployeeCreate,
       </div>
       <div style={{ display: isActive('approval') ? 'block' : 'none' }}>
         <ApprovalPage />
+      </div>
+      <div style={{ display: isActive('settings') ? 'block' : 'none' }}>
+        <UserSettingsPage />
       </div>
     </>
   );

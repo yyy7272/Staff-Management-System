@@ -8,12 +8,14 @@ import { menuItems } from "./components/constants/menu-items";
 import { MainContent } from "./components/MainContent";
 import { CalendarWidget } from "./components/CalendarWidget";
 import { NotificationWidget } from "./components/NotificationWidget";
-import { QuickActionsWidget } from "./components/QuickActionsWidget";
 import { Toaster } from "./components/ui/toaster";
 import { ErrorBoundary } from "./components/common";
 import LoginPage from "./components/pages/LoginPage";
 import RegisterPage from "./components/pages/RegisterPage";
 import EmailVerifiedPage from "./components/pages/EmailVerifiedPage";
+import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./components/pages/ResetPasswordPage";
+import UserSettingsPage from "./components/pages/UserSettingsPage";
 import { environment } from "./config/environment";
 import "tailwindcss";
 // Protected Route Component
@@ -55,7 +57,7 @@ const Dashboard: React.FC = () => {
       if (item.id === 'payroll') {
         return user?.isAdministrator || 
                (user?.email && user.email.includes('@')) && 
-               getDepartmentFromEmail(user.email) === 'hr';
+               getDepartmentFromEmail() === 'hr';
       }
       
       return true; // Default: show item
@@ -63,7 +65,7 @@ const Dashboard: React.FC = () => {
   };
   
   // Helper function to check if user is in HR department (simplified)
-  const getDepartmentFromEmail = (email: string): string => {
+  const getDepartmentFromEmail = (): string => {
     // This is a simplified check - in real implementation, 
     // you'd query the employee data to get department
     return 'other';
@@ -143,11 +145,25 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="" />
-                  <AvatarFallback>JS</AvatarFallback>
+                  <AvatarFallback>
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName[0]}${user.lastName[0]}` 
+                      : user?.username ? user.username[0].toUpperCase() 
+                      : 'U'}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium">John Smith</p>
-                  <p className="text-xs text-muted-foreground">System Administrator</p>
+                  <p className="text-sm font-medium">
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName} ${user.lastName}` 
+                      : user?.username || 'Unknown User'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {user?.isAdministrator ? 'Administrator' 
+                      : user?.canManageUsers ? 'User Manager'
+                      : user?.canManageRoles ? 'Role Manager' 
+                      : 'User'}
+                  </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   Logout
@@ -208,10 +224,23 @@ export default function App() {
           {/* Email verification - accessible without auth */}
           <Route path="/email-verified" element={<EmailVerifiedPage />} />
           
+          {/* Password reset routes - accessible without auth */}
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <ForgotPasswordPage />
+            </PublicRoute>
+          } />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          
           {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <UserSettingsPage />
             </ProtectedRoute>
           } />
           

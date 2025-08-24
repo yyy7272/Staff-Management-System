@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -249,6 +250,134 @@ namespace StaffManagementSystem.Controllers
             // We can add token blacklisting here if needed in the future
             _logger.LogInformation("User logged out");
             return Ok(new { message = "Logged out successfully" });
+        }
+
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Verify current password
+            if (!PasswordHasher.VerifyPassword(dto.CurrentPassword, user.PasswordHash, user.PasswordSalt))
+            {
+                _logger.LogWarning("Invalid current password provided for user: {Username}", user.Username);
+                return BadRequest("Current password is incorrect.");
+            }
+
+            // Generate new password hash
+            PasswordHasher.CreatePasswordHash(dto.NewPassword, out byte[] hash, out byte[] salt);
+
+            // Update password
+            user.PasswordHash = hash;
+            user.PasswordSalt = salt;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Password changed successfully for user: {Username}", user.Username);
+
+            return Ok(new { message = "Password changed successfully." });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            
+            // Don't reveal if email exists or not for security reasons
+            if (user == null)
+            {
+                return Ok(new { message = "If an account with this email exists, a password reset link has been sent." });
+            }
+
+            // Generate password reset token
+            var resetToken = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+            var tokenExpiry = DateTime.UtcNow.AddHours(1); // Token expires in 1 hour
+
+            user.PasswordResetToken = resetToken;
+            user.PasswordResetTokenExpiry = tokenExpiry;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            // Send password reset email
+            var emailSent = await _emailService.SendPasswordResetEmailAsync(user.Email, resetToken, user.FirstName ?? user.Username);
+
+            if (!emailSent)
+            {
+                _logger.LogWarning("Failed to send password reset email to {Email}", user.Email);
+            }
+
+            _logger.LogInformation("Password reset requested for email: {Email}", dto.Email);
+
+            return Ok(new { message = "If an account with this email exists, a password reset link has been sent." });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => 
+                u.Email == dto.Email && 
+                u.PasswordResetToken == dto.Token);
+
+            if (user == null)
+            {
+                _logger.LogWarning("Invalid password reset token for email: {Email}", dto.Email);
+                return BadRequest("Invalid or expired reset token.");
+            }
+
+            if (user.PasswordResetTokenExpiry == null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Expired password reset token for email: {Email}", dto.Email);
+                return BadRequest("Invalid or expired reset token.");
+            }
+
+            // Generate new password hash
+            PasswordHasher.CreatePasswordHash(dto.NewPassword, out byte[] hash, out byte[] salt);
+
+            // Update password and clear reset token
+            user.PasswordHash = hash;
+            user.PasswordSalt = salt;
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpiry = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            // Reset failed login attempts if any
+            user.FailedLoginAttempts = 0;
+            user.IsAccountLocked = false;
+            user.LockedUntil = null;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Password reset successfully for user: {Username}", user.Username);
+
+            return Ok(new { message = "Password reset successfully. You can now log in with your new password." });
         }
 
         // Utility methods
