@@ -27,7 +27,12 @@ namespace StaffManagementSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<object>>> GetAll([FromQuery] string? search = null, [FromQuery] string? departmentId = null, [FromQuery] string? status = null)
+        public async Task<ActionResult<object>> GetAll(
+            [FromQuery] string? search = null, 
+            [FromQuery] string? departmentId = null, 
+            [FromQuery] string? status = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int limit = 10)
         {
             var query = _context.Employees
                 .Include(e => e.Department)
@@ -48,7 +53,20 @@ namespace StaffManagementSystem.Controllers
                 query = query.Where(e => e.Status == status);
             }
 
+            // Get total count before pagination
+            var totalCount = await query.CountAsync();
+            
+            // Ensure page and limit are within reasonable bounds
+            page = Math.Max(1, page);
+            limit = Math.Max(1, Math.Min(100, limit)); // Cap limit at 100
+            
+            // Calculate pagination
+            var skip = (page - 1) * limit;
+            var totalPages = (int)Math.Ceiling((double)totalCount / limit);
+
             var employees = await query
+                .Skip(skip)
+                .Take(limit)
                 .Select(e => new
                 {
                     e.Id,
@@ -69,7 +87,19 @@ namespace StaffManagementSystem.Controllers
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
 
-            return Ok(employees);
+            return Ok(new
+            {
+                data = employees,
+                pagination = new
+                {
+                    page = page,
+                    limit = limit,
+                    total = totalCount,
+                    totalPages = totalPages,
+                    hasNextPage = page < totalPages,
+                    hasPreviousPage = page > 1
+                }
+            });
         }
 
         [HttpGet("{id}")]

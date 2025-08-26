@@ -30,6 +30,11 @@ export interface ResetPasswordData {
   confirmNewPassword: string;
 }
 
+export interface AvailabilityResponse {
+  isAvailable: boolean;
+  message: string;
+}
+
 export interface LoginResponse {
   token: string;
   user: {
@@ -114,6 +119,22 @@ class AuthService {
   async resetPassword(data: ResetPasswordData): Promise<{ message: string }> {
     try {
       return await apiClient.post<{ message: string }>('/auth/reset-password', data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async checkUsernameAvailability(username: string): Promise<AvailabilityResponse> {
+    try {
+      return await apiClient.post<AvailabilityResponse>('/auth/check-username', { username });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async checkEmailAvailability(email: string): Promise<AvailabilityResponse> {
+    try {
+      return await apiClient.post<AvailabilityResponse>('/auth/check-email', { email });
     } catch (error) {
       throw error;
     }

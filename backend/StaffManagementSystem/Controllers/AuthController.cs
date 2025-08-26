@@ -380,6 +380,40 @@ namespace StaffManagementSystem.Controllers
             return Ok(new { message = "Password reset successfully. You can now log in with your new password." });
         }
 
+        [HttpPost("check-username")]
+        public async Task<IActionResult> CheckUsernameAvailability(UsernameAvailabilityDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var exists = await _context.Users.AnyAsync(u => u.Username == dto.Username);
+            
+            return Ok(new AvailabilityResponse
+            {
+                IsAvailable = !exists,
+                Message = exists ? "Username is already taken." : "Username is available."
+            });
+        }
+
+        [HttpPost("check-email")]
+        public async Task<IActionResult> CheckEmailAvailability(EmailAvailabilityDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var exists = await _context.Users.AnyAsync(u => u.Email == dto.Email);
+            
+            return Ok(new AvailabilityResponse
+            {
+                IsAvailable = !exists,
+                Message = exists ? "Email is already registered." : "Email is available."
+            });
+        }
+
         // Utility methods
         
 

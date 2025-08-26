@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { MoreHorizontal, ChevronUp, ChevronDown } from "lucide-react";
+import { Pagination, PaginationInfo } from "../ui/pagination";
 import type { TableColumn, TableAction } from '../../types/common';
 
 interface DataTableProps<T extends { id: string }> {
@@ -21,6 +22,10 @@ interface DataTableProps<T extends { id: string }> {
   emptyMessage?: string;
   loading?: boolean;
   className?: string;
+  pagination?: PaginationInfo;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  showPagination?: boolean;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -37,7 +42,11 @@ export function DataTable<T extends { id: string }>({
   onSort,
   emptyMessage = "No data found",
   loading = false,
-  className = ""
+  className = "",
+  pagination,
+  onPageChange,
+  onPageSizeChange,
+  showPagination = false
 }: DataTableProps<T>) {
   const allSelected = data.length > 0 && selectedItems.size === data.length;
   const someSelected = selectedItems.size > 0 && selectedItems.size < data.length;
@@ -226,6 +235,17 @@ export function DataTable<T extends { id: string }>({
       {data.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {emptyMessage}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {showPagination && pagination && onPageChange && onPageSizeChange && (
+        <div className="mt-4">
+          <Pagination
+            pagination={pagination}
+            onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
         </div>
       )}
     </div>
