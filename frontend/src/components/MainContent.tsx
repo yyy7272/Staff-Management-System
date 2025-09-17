@@ -1,6 +1,8 @@
 import { HomePage } from "./pages/HomePage";
 import { OrganizationPage } from "./pages/OrganizationPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { GroupsPage } from "./pages/GroupsPage";
+import { FilesPage } from "./pages/FilesPage";
 import { PayrollPage } from "./pages/PayrollPage";
 import { PermissionsPage } from "./pages/PermissionsPage";
 import { ApprovalPage } from "./pages/ApprovalPage";
@@ -19,7 +21,7 @@ interface MainContentProps {
 export function MainContent({ activeMenu, setActiveMenu, autoOpenEmployeeCreate, autoOpenDepartmentCreate, onQuickAddEmployee, onQuickAddDepartment }: MainContentProps) {
   // Keep components mounted but hidden to preserve state
   const isActive = (page: string) => activeMenu === page;
-  const defaultToHome = !['home', 'organization', 'employees', 'payroll', 'permissions', 'approval', 'settings'].includes(activeMenu);
+  const defaultToHome = !['home', 'organization', 'employees', 'groups', 'files', 'payroll', 'permissions', 'approval', 'settings'].includes(activeMenu);
 
   return (
     <>
@@ -31,6 +33,12 @@ export function MainContent({ activeMenu, setActiveMenu, autoOpenEmployeeCreate,
       </div>
       <div style={{ display: isActive('employees') ? 'block' : 'none' }}>
         <EmployeesPage autoOpenCreate={autoOpenEmployeeCreate} />
+      </div>
+      <div style={{ display: isActive('groups') ? 'block' : 'none' }}>
+        <GroupsPage />
+      </div>
+      <div style={{ display: isActive('files') ? 'block' : 'none' }}>
+        <FilesPage />
       </div>
       <div style={{ display: isActive('payroll') ? 'block' : 'none' }}>
         <PayrollPage />

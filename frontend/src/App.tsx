@@ -17,6 +17,8 @@ import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./components/pages/ResetPasswordPage";
 import UserSettingsPage from "./components/pages/UserSettingsPage";
 import { environment } from "./config/environment";
+import { CollaborationProvider } from "./contexts/CollaborationContext";
+import { SmartCollaborationIndicator } from "./components/collaboration";
 import "tailwindcss";
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -135,6 +137,9 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-4">
+              {/* Collaboration Indicator */}
+              <SmartCollaborationIndicator className="hidden lg:flex" />
+              
               {/* Notification Icon */}
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="h-5 w-5" />
@@ -235,7 +240,9 @@ export default function App() {
           {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard />
+              <CollaborationProvider>
+                <Dashboard />
+              </CollaborationProvider>
             </ProtectedRoute>
           } />
           <Route path="/settings" element={

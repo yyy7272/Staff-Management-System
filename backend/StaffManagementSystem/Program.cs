@@ -26,13 +26,15 @@ namespace StaffManagementSystem
                     policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:8000", "http://localhost:5173") // Support multiple frontend ports
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials();
+                          .AllowCredentials()
+                          .SetIsOriginAllowed(_ => true); // Allow all origins for SignalR during development
                 });
             });
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi(); // OpenAPI/Swagger
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddMemoryCache(); // Add Memory Cache for collaboration service
             builder.Services.AddDbContext<StaffDbContext>(options =>
               options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
                 ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
@@ -65,6 +67,18 @@ namespace StaffManagementSystem
 
             // Register Notification Service
             builder.Services.AddScoped<INotificationService, NotificationService>();
+
+            // Register Collaboration Service
+            builder.Services.AddScoped<ICollaborationService, CollaborationService>();
+
+            // Register Group Service
+            builder.Services.AddScoped<IGroupService, GroupService>();
+
+            // Register Shared File Service
+            builder.Services.AddScoped<ISharedFileService, SharedFileService>();
+
+            // Add SignalR
+            builder.Services.AddSignalR();
             
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
               .AddJwtBearer(options =>
@@ -80,6 +94,21 @@ namespace StaffManagementSystem
                       ValidAudience = builder.Configuration["Jwt:Audience"],
                       ValidateLifetime = true,
                       ClockSkew = TimeSpan.Zero // Reduce token lifetime tolerance
+                  };
+
+                  // Configure SignalR JWT authentication
+                  options.Events = new JwtBearerEvents
+                  {
+                      OnMessageReceived = context =>
+                      {
+                          var accessToken = context.Request.Query["access_token"];
+                          var path = context.HttpContext.Request.Path;
+                          if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/collaborationHub"))
+                          {
+                              context.Token = accessToken;
+                          }
+                          return Task.CompletedTask;
+                      }
                   };
               });
 
@@ -174,6 +203,9 @@ namespace StaffManagementSystem
             app.UseCompanyAccessValidation();
 
             app.MapControllers();
+
+            // Map SignalR Hub
+            app.MapHub<StaffManagementSystem.Hubs.CollaborationHub>("/collaborationHub");
 
             app.Run();
         }

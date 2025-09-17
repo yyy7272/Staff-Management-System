@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collaboration Debug</title>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+</head>
+<body>
+    <h1>Collaboration Debug</h1>
+    <div id="status">Disconnected</div>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="testSession()">Test Session</button>
+    <button onclick="testLock()">Test Lock</button>
+    <div id="log"></div>
+    
+    <script>
+        const token = 'eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTUxMiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYWRtaW4iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJhZG1pbkBjb21wYW55LmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiMWFjZTJjM2EtYTk1ZC00MzVkLWI5ODktOTBlNTI2MGQzOTFlIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc1NzE2MjQ4NSwiaXNzIjoiU3RhZmZNYW5hZ2VtZW50U3lzdGVtIiwiYXVkIjoiU3RhZmZNYW5hZ2VtZW50U3lzdGVtVXNlcnMifQ.v-OFGUVjL7WzrrNDTQmLt-oyMhOzW7yiTXDBOzgVgLsWJLSeZb7D_HWe9wj0rVkTuGjYVBVWS9y1GV7utV0e-w';
+        const employeeId = '6f1e843f-a738-4635-881b-bdd16ecf4fb5';
+        let connection = null;
+
+        function log(message) {
+            console.log(message);
+            document.getElementById('log').innerHTML += '<div>' + new Date().toISOString() + ': ' + message + '</div>';
+        }
+
+        function testConnection() {
+            if (connection) {
+                connection.stop();
+            }
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5000/collaborationHub", {
+                    accessTokenFactory: () => token,
+                    transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents
+                })
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.start().then(function () {
+                document.getElementById('status').textContent = 'Connected';
+                log('Connected successfully!');
+            }).catch(function (err) {
+                document.getElementById('status').textContent = 'Error';
+                log('Connection Error: ' + err.toString());
+            });
+
+            // Event listeners
+            connection.on('UserJoined', function (entityType, entityId, user) {
+                log('UserJoined event: ' + user.userName + ' in ' + entityType + ':' + entityId);
+            });
+
+            connection.on('FieldLocked', function (entityType, entityId, fieldName, userId, userName) {
+                log('FieldLocked event: Field ' + fieldName + ' locked by ' + userName);
+            });
+        }
+
+        function testSession() {
+            if (!connection) {
+                log('No connection');
+                return;
+            }
+
+            log('Testing session join...');
+            connection.invoke('JoinSession', 'Employee', employeeId).then(function () {
+                log('Successfully joined session');
+            }).catch(function (err) {
+                log('Session join error: ' + err.toString());
+            });
+        }
+
+        function testLock() {
+            if (!connection) {
+                log('No connection');
+                return;
+            }
+
+            log('Testing field lock...');
+            connection.invoke('LockField', 'Employee', employeeId, 'Name').then(function () {
+                log('Successfully requested field lock');
+            }).catch(function (err) {
+                log('Field lock error: ' + err.toString());
+            });
+        }
+    </script>
+</body>
+</html>
