@@ -1,0 +1,65 @@
+# Build output
+bin/
+obj/
+out/
+
+# NuGet packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Git
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Database files
+*.db
+*.sqlite
+
+# Environment files
+.env
+.env.*
+
+# Documentation
+README.md
+*.md
+
+# Test files
+**/Tests/
+**/*Test*/
+**/*Tests*/
+**/*.Test.*
+**/*.Tests.*
+
+# Temporary files
+tmp/
+temp/
+
+# Application specific
+appsettings.Development.json
+appsettings.Local.json
