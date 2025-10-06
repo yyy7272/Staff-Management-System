@@ -1,4 +1,4 @@
-using StaffManagementSystem.DataTransferObj;
+﻿using StaffManagementSystem.DataTransferObj;
 using StaffManagementSystem.Models;
 
 namespace StaffManagementSystem.Services
@@ -33,7 +33,7 @@ namespace StaffManagementSystem.Services
         // Template-based notifications
         Task<NotificationDto> CreateWelcomeNotificationAsync(string userId, string userName);
         Task<NotificationDto> CreateApprovalNotificationAsync(string userId, string approvalId, string approvalTitle, string triggerUserName);
-        Task<NotificationDto> CreateEmployeeCreatedNotificationAsync(string userId, string employeeName, string triggerUserName);
+        Task<NotificationDto> CreateEmployeeCreatedNotificationAsync(string userId, string UserName, string triggerUserName);
         Task<NotificationDto> CreatePasswordResetNotificationAsync(string userId);
         Task<NotificationDto> CreateSecurityAlertNotificationAsync(string userId, string alertMessage);
         Task<NotificationDto> CreateCollaborationNotificationAsync(string userId, string entityType, string entityId, string message, string triggerUserName);

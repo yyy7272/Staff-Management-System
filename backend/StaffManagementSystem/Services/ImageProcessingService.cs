@@ -1,4 +1,4 @@
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
 
@@ -6,7 +6,7 @@ namespace StaffManagementSystem.Services
 {
     public interface IImageProcessingService
     {
-        Task<(string originalPath, string thumbnailPath)> ProcessAvatarAsync(IFormFile file, string employeeId);
+        Task<(string originalPath, string thumbnailPath)> ProcessAvatarAsync(IFormFile file, string UserId);
         Task DeleteAvatarAsync(string imagePath);
         bool IsValidImageFile(IFormFile file);
     }
@@ -67,13 +67,13 @@ namespace StaffManagementSystem.Services
             }
         }
 
-        public async Task<(string originalPath, string thumbnailPath)> ProcessAvatarAsync(IFormFile file, string employeeId)
+        public async Task<(string originalPath, string thumbnailPath)> ProcessAvatarAsync(IFormFile file, string UserId)
         {
             if (!IsValidImageFile(file))
                 throw new ArgumentException("Invalid image file");
 
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            var fileName = $"{employeeId}_{timestamp}";
+            var fileName = $"{UserId}_{timestamp}";
             
             var originalPath = Path.Combine(_avatarsPath, $"{fileName}.jpg");
             var thumbnailPath = Path.Combine(_avatarsPath, $"{fileName}_thumb.jpg");
@@ -111,13 +111,13 @@ namespace StaffManagementSystem.Services
                     Quality = 85
                 });
 
-                _logger.LogInformation("Avatar processed successfully for employee {EmployeeId}", employeeId);
+                _logger.LogInformation("Avatar processed successfully for User {UserId}", UserId);
                 
                 return (originalPath, thumbnailPath);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing avatar for employee {EmployeeId}", employeeId);
+                _logger.LogError(ex, "Error processing avatar for User {UserId}", UserId);
                 
                 // Clean up any partial files
                 if (File.Exists(originalPath)) File.Delete(originalPath);

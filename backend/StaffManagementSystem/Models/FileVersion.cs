@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StaffManagementSystem.Models
@@ -45,7 +45,7 @@ namespace StaffManagementSystem.Models
 
         // Navigation properties
         public SharedFile? SharedFile { get; set; }
-        public Employee? UploadedBy { get; set; }
+        public User? UploadedBy { get; set; }
 
         public FileVersion()
         {

@@ -29,7 +29,7 @@ namespace StaffManagementSystem.DataTransferObj
     {
         public IFormFile File { get; set; } = null!;
         public string? Description { get; set; }
-        public string Tags { get; set; } = string.Empty; // JSON string of tags
+        public string? Tags { get; set; } = string.Empty; // JSON string of tags
         public string? GroupId { get; set; }
         public string ShareType { get; set; } = "group"; // group, company, department
     }
@@ -57,8 +57,8 @@ namespace StaffManagementSystem.DataTransferObj
     public class ShareFileDto
     {
         public string FileId { get; set; } = string.Empty;
-        public string ShareType { get; set; } = "employee"; // employee, group, department, company
-        public string? EmployeeId { get; set; }
+        public string ShareType { get; set; } = "User"; // User, group, department, company
+        public string? UserId { get; set; }
         public string? GroupId { get; set; }
         public string? DepartmentId { get; set; }
         public string Permission { get; set; } = "view"; // view, download, edit
@@ -75,7 +75,7 @@ namespace StaffManagementSystem.DataTransferObj
         public string SharedByName { get; set; } = string.Empty;
         public string? SharedWithId { get; set; }
         public string? SharedWithName { get; set; }
-        public string ShareType { get; set; } = "employee";
+        public string ShareType { get; set; } = "User";
         public string Permission { get; set; } = "view";
         public string? Message { get; set; }
         public DateTime? ExpiresAt { get; set; }

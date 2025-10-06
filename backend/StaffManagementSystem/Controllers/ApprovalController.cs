@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StaffManagementSystem.DbContexts;
@@ -121,12 +121,12 @@ namespace StaffManagementSystem.Controllers
                 return Unauthorized("User not authenticated");
             }
 
-            // Try to find an employee matching the current user
-            var employee = await _context.Employees
+            // Try to find a user matching the current user
+            var currentUser = await _context.Users
                 .FirstOrDefaultAsync(e => e.Email == $"{currentUsername}@company.com" || e.Name.ToLower().Contains(currentUsername.ToLower()));
 
-            // If no employee found, create a temporary one for demo purposes
-            if (employee == null)
+            // If no user found, create a temporary one for demo purposes
+            if (currentUser == null)
             {
                 // Check if there's a default department
                 var defaultDepartment = await _context.Departments.FirstOrDefaultAsync();
@@ -144,7 +144,7 @@ namespace StaffManagementSystem.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                employee = new Employee
+                currentUser = new User
                 {
                     Id = Guid.NewGuid().ToString(),
                     Name = currentUsername,
@@ -154,7 +154,7 @@ namespace StaffManagementSystem.Controllers
                     Status = "active",
                     CreatedAt = DateTime.UtcNow
                 };
-                _context.Employees.Add(employee);
+                _context.Users.Add(currentUser);
                 await _context.SaveChangesAsync();
             }
 
@@ -167,7 +167,7 @@ namespace StaffManagementSystem.Controllers
                 Type = approvalDto.Type,
                 Priority = approvalDto.Priority,
                 Status = "pending",
-                ApplicantId = employee.Id,
+                ApplicantId = currentUser.Id,
                 Amount = approvalDto.Amount,
                 DueDate = approvalDto.DueDate,
                 RequestDate = DateTime.UtcNow,
@@ -196,7 +196,7 @@ namespace StaffManagementSystem.Controllers
                 await _notificationService.CreateNotificationAsync(
                     "approval",
                     "New Approval Request",
-                    $"New {approval.Type} request from {employee.Name}: {approval.Title}",
+                    $"New {approval.Type} request from {currentUser.Name}: {approval.Title}",
                     admin.Id,
                     GetPriorityFromApprovalPriority(approval.Priority),
                     "approval",

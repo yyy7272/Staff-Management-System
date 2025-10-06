@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StaffManagementSystem.DbContexts;
@@ -47,8 +47,7 @@ namespace StaffManagementSystem.Controllers
                     u.IsAdministrator,
                     u.CanManageUsers,
                     u.CanManageRoles,
-                    u.CanAccessEmployees,
-                    u.CanManageEmployees,
+                    u.CanAccessUsers,
                     u.CanAccessOrganization,
                     u.CanManageOrganization,
                     u.CanAccessPayroll,
@@ -98,8 +97,8 @@ namespace StaffManagementSystem.Controllers
             user.CanManageRoles = dto.CanManageRoles;
             
             // Update page access permissions
-            user.CanAccessEmployees = dto.CanAccessEmployees;
-            user.CanManageEmployees = dto.CanManageEmployees;
+            user.CanAccessUsers = dto.CanAccessUsers;
+            user.CanManageUsers = dto.CanManageUsers;
             user.CanAccessOrganization = dto.CanAccessOrganization;
             user.CanManageOrganization = dto.CanManageOrganization;
             user.CanAccessPayroll = dto.CanAccessPayroll;
@@ -112,8 +111,8 @@ namespace StaffManagementSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("User permissions updated by {AdminUser} for user {TargetUser}: Admin={IsAdmin}, Pages=[Employees:{CanAccessEmployees}/{CanManageEmployees}, Org:{CanAccessOrganization}/{CanManageOrganization}, Payroll:{CanAccessPayroll}/{CanManagePayroll}, Approvals:{CanAccessApprovals}/{CanManageApprovals}, Permissions:{CanAccessPermissions}]",
-                currentUser.Username, user.Username, dto.IsAdministrator, dto.CanAccessEmployees, dto.CanManageEmployees, dto.CanAccessOrganization, dto.CanManageOrganization, dto.CanAccessPayroll, dto.CanManagePayroll, dto.CanAccessApprovals, dto.CanManageApprovals, dto.CanAccessPermissions);
+            _logger.LogInformation("User permissions updated by {AdminUser} for user {TargetUser}: Admin={IsAdmin}, Pages=[Users:{CanAccessUsers}/{CanManageUsers}, Org:{CanAccessOrganization}/{CanManageOrganization}, Payroll:{CanAccessPayroll}/{CanManagePayroll}, Approvals:{CanAccessApprovals}/{CanManageApprovals}, Permissions:{CanAccessPermissions}]",
+                currentUser.Username, user.Username, dto.IsAdministrator, dto.CanAccessUsers, dto.CanManageUsers, dto.CanAccessOrganization, dto.CanManageOrganization, dto.CanAccessPayroll, dto.CanManagePayroll, dto.CanAccessApprovals, dto.CanManageApprovals, dto.CanAccessPermissions);
 
             return Ok(new
             {
@@ -126,8 +125,7 @@ namespace StaffManagementSystem.Controllers
                     user.IsAdministrator,
                     user.CanManageUsers,
                     user.CanManageRoles,
-                    user.CanAccessEmployees,
-                    user.CanManageEmployees,
+                    user.CanAccessUsers,
                     user.CanAccessOrganization,
                     user.CanManageOrganization,
                     user.CanAccessPayroll,
@@ -268,10 +266,9 @@ namespace StaffManagementSystem.Controllers
         public bool IsAdministrator { get; set; }
         public bool CanManageUsers { get; set; }
         public bool CanManageRoles { get; set; }
-        
+
         // Page access permissions
-        public bool CanAccessEmployees { get; set; }
-        public bool CanManageEmployees { get; set; }
+        public bool CanAccessUsers { get; set; }
         public bool CanAccessOrganization { get; set; }
         public bool CanManageOrganization { get; set; }
         public bool CanAccessPayroll { get; set; }

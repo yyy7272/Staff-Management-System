@@ -22,7 +22,7 @@ namespace StaffManagementSystem.Controllers
         public async Task<ActionResult<IEnumerable<object>>> GetAll()
         {
             var departments = await _context.Departments
-                .Include(d => d.Employees)
+                .Include(d => d.Users)
                 .Select(d => new
                 {
                     d.Id,
@@ -30,8 +30,8 @@ namespace StaffManagementSystem.Controllers
                     d.Description,
                     d.CreatedAt,
                     d.UpdatedAt,
-                    EmployeeCount = d.Employees.Count,
-                    ActiveEmployeeCount = d.Employees.Count(e => e.Status == "active")
+                    EmployeeCount = d.Users.Count,
+                    ActiveEmployeeCount = d.Users.Count(e => e.Status == "active")
                 })
                 .OrderBy(d => d.Name)
                 .ToListAsync();
@@ -43,7 +43,7 @@ namespace StaffManagementSystem.Controllers
         public async Task<ActionResult<object>> GetById(string id)
         {
             var department = await _context.Departments
-                .Include(d => d.Employees)
+                .Include(d => d.Users)
                 .Where(d => d.Id == id)
                 .Select(d => new
                 {
@@ -52,7 +52,7 @@ namespace StaffManagementSystem.Controllers
                     d.Description,
                     d.CreatedAt,
                     d.UpdatedAt,
-                    Employees = d.Employees.Select(e => new
+                    Users = d.Users.Select(e => new
                     {
                         e.Id,
                         e.Name,
@@ -60,8 +60,8 @@ namespace StaffManagementSystem.Controllers
                         e.Position,
                         e.Status
                     }).ToList(),
-                    EmployeeCount = d.Employees.Count,
-                    ActiveEmployeeCount = d.Employees.Count(e => e.Status == "active")
+                    EmployeeCount = d.Users.Count,
+                    ActiveEmployeeCount = d.Users.Count(e => e.Status == "active")
                 })
                 .FirstOrDefaultAsync();
 
@@ -131,7 +131,7 @@ namespace StaffManagementSystem.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             var department = await _context.Departments
-                .Include(d => d.Employees)
+                .Include(d => d.Users)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (department == null)
@@ -139,10 +139,10 @@ namespace StaffManagementSystem.Controllers
                 return NotFound();
             }
 
-            // Prevent deletion of departments with active employees
-            if (department.Employees != null && department.Employees.Any(e => e.Status == "active"))
+            // Prevent deletion of departments with active Users
+            if (department.Users != null && department.Users.Any(e => e.Status == "active"))
             {
-                return BadRequest("Cannot delete department with active employees.");
+                return BadRequest("Cannot delete department with active Users.");
             }
 
             _context.Departments.Remove(department);
@@ -157,14 +157,14 @@ namespace StaffManagementSystem.Controllers
             var totalDepartments = await _context.Departments.CountAsync();
             
             var departmentStats = await _context.Departments
-                .Include(d => d.Employees)
+                .Include(d => d.Users)
                 .Select(d => new
                 {
                     DepartmentName = d.Name,
-                    TotalEmployees = d.Employees.Count,
-                    ActiveEmployees = d.Employees.Count(e => e.Status == "active"),
-                    AverageSalary = d.Employees.Where(e => e.Salary.HasValue).Average(e => e.Salary.Value),
-                    LatestHire = d.Employees.Where(e => e.HireDate.HasValue).Max(e => e.HireDate.Value)
+                    TotalEmployees = d.Users.Count,
+                    ActiveEmployees = d.Users.Count(e => e.Status == "active"),
+                    AverageSalary = d.Users.Where(e => e.Salary.HasValue).Average(e => e.Salary.Value),
+                    LatestHire = d.Users.Where(e => e.HireDate.HasValue).Max(e => e.HireDate.Value)
                 })
                 .ToListAsync();
 
@@ -192,7 +192,7 @@ namespace StaffManagementSystem.Controllers
             });
         }
 
-        [HttpGet("{id}/employees")]
+        [HttpGet("{id}/Users")]
         public async Task<ActionResult<IEnumerable<object>>> GetDepartmentEmployees(string id, [FromQuery] string? status = null)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -201,7 +201,7 @@ namespace StaffManagementSystem.Controllers
                 return NotFound();
             }
 
-            var query = _context.Employees
+            var query = _context.Users
                 .Where(e => e.DepartmentId == id);
 
             if (!string.IsNullOrEmpty(status))
@@ -209,7 +209,7 @@ namespace StaffManagementSystem.Controllers
                 query = query.Where(e => e.Status == status);
             }
 
-            var employees = await query
+            var Users = await query
                 .Select(e => new
                 {
                     e.Id,
@@ -225,7 +225,7 @@ namespace StaffManagementSystem.Controllers
                 .OrderBy(e => e.Name)
                 .ToListAsync();
 
-            return Ok(employees);
+            return Ok(Users);
         }
 
         private bool DepartmentExists(string id)

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StaffManagementSystem.DbContexts;
@@ -34,7 +34,7 @@ namespace StaffManagementSystem.Controllers
             }
 
             var query = _context.Payrolls
-                .Include(p => p.Employee)
+                .Include(p => p.User)
                 .ThenInclude(e => e.Department)
                 .AsQueryable();
 
@@ -64,13 +64,13 @@ namespace StaffManagementSystem.Controllers
                     p.CreatedAt,
                     p.ProcessedBy,
                     p.ProcessedAt,
-                    Employee = new
+                    User = new
                     {
-                        p.Employee.Id,
-                        p.Employee.Name,
-                        p.Employee.Email,
-                        p.Employee.Position,
-                        Department = p.Employee.Department.Name
+                        p.User.Id,
+                        p.User.Name,
+                        p.User.Email,
+                        p.User.Position,
+                        Department = p.User.Department.Name
                     }
                 })
                 .ToListAsync();
@@ -101,7 +101,7 @@ namespace StaffManagementSystem.Controllers
             }
 
             var payroll = await _context.Payrolls
-                .Include(p => p.Employee)
+                .Include(p => p.User)
                 .ThenInclude(e => e.Department)
                 .Where(p => p.Id == id)
                 .Select(p => new
@@ -121,13 +121,13 @@ namespace StaffManagementSystem.Controllers
                     p.UpdatedAt,
                     p.ProcessedBy,
                     p.ProcessedAt,
-                    Employee = new
+                    User = new
                     {
-                        p.Employee.Id,
-                        p.Employee.Name,
-                        p.Employee.Email,
-                        p.Employee.Position,
-                        Department = p.Employee.Department.Name
+                        p.User.Id,
+                        p.User.Name,
+                        p.User.Email,
+                        p.User.Position,
+                        Department = p.User.Department.Name
                     }
                 })
                 .FirstOrDefaultAsync();
@@ -138,7 +138,7 @@ namespace StaffManagementSystem.Controllers
             }
 
             await _activityService.LogActivityAsync("payroll", "viewed", 
-                $"Viewed payroll record for {payroll.Employee.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
+                $"Viewed payroll record for {payroll.User.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
 
             return Ok(payroll);
         }
@@ -152,16 +152,16 @@ namespace StaffManagementSystem.Controllers
                 return Forbid("Access denied. Administrator or HR privileges required.");
             }
 
-            // Validate employee exists
-            var employee = await _context.Employees.FindAsync(dto.EmployeeId);
-            if (employee == null)
+            // Validate User exists
+            var User = await _context.Users.FindAsync(dto.UserId);
+            if (User == null)
             {
-                return BadRequest("Employee not found.");
+                return BadRequest("User not found.");
             }
 
             // Check for overlapping pay periods
             var hasOverlap = await _context.Payrolls
-                .AnyAsync(p => p.EmployeeId == dto.EmployeeId &&
+                .AnyAsync(p => p.UserId == dto.UserId &&
                              p.Id != dto.Id &&
                              ((dto.PayPeriodStart >= p.PayPeriodStart && dto.PayPeriodStart <= p.PayPeriodEnd) ||
                               (dto.PayPeriodEnd >= p.PayPeriodStart && dto.PayPeriodEnd <= p.PayPeriodEnd) ||
@@ -174,7 +174,7 @@ namespace StaffManagementSystem.Controllers
 
             var payroll = new Payroll
             {
-                EmployeeId = dto.EmployeeId,
+                UserId = dto.UserId,
                 PayPeriodStart = dto.PayPeriodStart,
                 PayPeriodEnd = dto.PayPeriodEnd,
                 BaseSalary = dto.BaseSalary,
@@ -192,7 +192,7 @@ namespace StaffManagementSystem.Controllers
             await _context.SaveChangesAsync();
 
             await _activityService.LogActivityAsync("payroll", "created", 
-                $"Created payroll record for {employee.Name}", "Payroll", payroll.Id, currentUser.Id, currentUser.Username);
+                $"Created payroll record for {User.Name}", "Payroll", payroll.Id, currentUser.Id, currentUser.Username);
 
             return Ok(new { id = payroll.Id, message = "Payroll record created successfully." });
         }
@@ -231,9 +231,9 @@ namespace StaffManagementSystem.Controllers
 
             await _context.SaveChangesAsync();
 
-            var employee = await _context.Employees.FindAsync(payroll.EmployeeId);
+            var User = await _context.Users.FindAsync(payroll.UserId);
             await _activityService.LogActivityAsync("payroll", "updated", 
-                $"Updated payroll record for {employee?.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
+                $"Updated payroll record for {User?.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
 
             return Ok(new { message = "Payroll record updated successfully." });
         }
@@ -248,7 +248,7 @@ namespace StaffManagementSystem.Controllers
             }
 
             var payroll = await _context.Payrolls
-                .Include(p => p.Employee)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (payroll == null)
@@ -274,7 +274,7 @@ namespace StaffManagementSystem.Controllers
             await _context.SaveChangesAsync();
 
             await _activityService.LogActivityAsync("payroll", "status_updated", 
-                $"Changed payroll status to {dto.Status} for {payroll.Employee.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
+                $"Changed payroll status to {dto.Status} for {payroll.User.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
 
             return Ok(new { message = $"Payroll status updated to {dto.Status}." });
         }
@@ -289,7 +289,7 @@ namespace StaffManagementSystem.Controllers
             }
 
             var payroll = await _context.Payrolls
-                .Include(p => p.Employee)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (payroll == null)
@@ -301,7 +301,7 @@ namespace StaffManagementSystem.Controllers
             await _context.SaveChangesAsync();
 
             await _activityService.LogActivityAsync("payroll", "deleted", 
-                $"Deleted payroll record for {payroll.Employee.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
+                $"Deleted payroll record for {payroll.User.Name}", "Payroll", id, currentUser.Id, currentUser.Username);
 
             return Ok(new { message = "Payroll record deleted successfully." });
         }
@@ -444,11 +444,11 @@ namespace StaffManagementSystem.Controllers
 
             // Check if user is in HR department or has HR role
             // This is a simplified check - you can expand this based on your business logic
-            var employee = await _context.Employees
+            var User = await _context.Users
                 .Include(e => e.Department)
                 .FirstOrDefaultAsync(e => e.Email == user.Email);
 
-            if (employee?.Department?.Name == "Human Resources")
+            if (User?.Department?.Name == "Human Resources")
                 return true;
 
             // You can add more role-based checks here
@@ -458,7 +458,7 @@ namespace StaffManagementSystem.Controllers
 
     public class CreatePayrollDto
     {
-        public string EmployeeId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         public DateTime PayPeriodStart { get; set; }
         public DateTime PayPeriodEnd { get; set; }
         public decimal BaseSalary { get; set; }

@@ -146,39 +146,9 @@ namespace StaffManagementSystem
                         staffContext.Departments.Add(dept);
                     }
                     await staffContext.SaveChangesAsync();
-                    
-                    // Add sample employees
-                    var employees = new[]
-                    {
-                        new Employee 
-                        { 
-                            Id = Guid.NewGuid().ToString(), 
-                            Name = "John Doe", 
-                            Email = "john@company.com", 
-                            Position = "Software Developer", 
-                            DepartmentId = departments[0].Id, 
-                            Salary = 75000, 
-                            Status = "active", 
-                            HireDate = DateTime.Now.AddYears(-1) 
-                        },
-                        new Employee 
-                        { 
-                            Id = Guid.NewGuid().ToString(), 
-                            Name = "Jane Smith", 
-                            Email = "jane@company.com", 
-                            Position = "Marketing Manager", 
-                            DepartmentId = departments[1].Id, 
-                            Salary = 65000, 
-                            Status = "active", 
-                            HireDate = DateTime.Now.AddMonths(-6) 
-                        }
-                    };
-                    
-                    foreach (var emp in employees)
-                    {
-                        staffContext.Employees.Add(emp);
-                    }
-                    await staffContext.SaveChangesAsync();
+
+                    // Note: Users are created through the authentication system
+                    // Sample users can be created via the registration endpoint
                 }
             }
 

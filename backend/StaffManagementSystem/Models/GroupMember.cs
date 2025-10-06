@@ -13,8 +13,8 @@ namespace StaffManagementSystem.Models
         public string GroupId { get; set; } = string.Empty;
 
         [Required]
-        [ForeignKey("Employee")]
-        public string EmployeeId { get; set; } = string.Empty;
+        [ForeignKey("User")]
+        public string UserId { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20)]
@@ -29,7 +29,7 @@ namespace StaffManagementSystem.Models
 
         // Navigation properties
         public Group? Group { get; set; }
-        public Employee? Employee { get; set; }
+        public User? User { get; set; }
 
         public GroupMember()
         {

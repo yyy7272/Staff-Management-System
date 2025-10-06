@@ -56,7 +56,7 @@ namespace StaffManagementSystem.Models
         public DateTime? DeletedAt { get; set; }
 
         // Navigation properties
-        public Employee? Uploader { get; set; }
+        public User? Uploader { get; set; }
         public Group? Group { get; set; }
         public ICollection<FileShare> FileShares { get; set; } = new List<FileShare>();
         public ICollection<FileVersion> Versions { get; set; } = new List<FileVersion>();

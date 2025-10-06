@@ -11,7 +11,6 @@ namespace StaffManagementSystem.DbContexts
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Employee> Employees { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Approval> Approvals { get; set; }
         public DbSet<Activity> Activities { get; set; }
@@ -34,14 +33,14 @@ namespace StaffManagementSystem.DbContexts
                 .HasForeignKey(d => d.ParentDepartmentId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
 
-            // Employee-Department relationship
-            modelBuilder.Entity<Employee>()
-                .HasOne(e => e.Department)
-                .WithMany(d => d.Employees)
-                .HasForeignKey(e => e.DepartmentId)
+            // User-Department relationship
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Department)
+                .WithMany(d => d.Users)
+                .HasForeignKey(u => u.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Approval relationships (back to using Employee)
+            // Approval relationships
             modelBuilder.Entity<Approval>()
                 .HasOne(a => a.Applicant)
                 .WithMany(e => e.ApplicantApprovals)
@@ -65,9 +64,6 @@ namespace StaffManagementSystem.DbContexts
                 .Property(u => u.UpdatedAt)
                 .ValueGeneratedOnUpdate();
 
-            modelBuilder.Entity<Employee>()
-                .Property(e => e.UpdatedAt)
-                .ValueGeneratedOnUpdate();
 
             modelBuilder.Entity<Department>()
                 .Property(d => d.UpdatedAt)
@@ -86,11 +82,11 @@ namespace StaffManagementSystem.DbContexts
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Payroll-Employee relationship (back to Employee)
+            // Payroll-User relationship
             modelBuilder.Entity<Payroll>()
-                .HasOne(p => p.Employee)
+                .HasOne(p => p.User)
                 .WithMany()
-                .HasForeignKey(p => p.EmployeeId)
+                .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Payroll>()
@@ -129,14 +125,14 @@ namespace StaffManagementSystem.DbContexts
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<GroupMember>()
-                .HasOne(gm => gm.Employee)
+                .HasOne(gm => gm.User)
                 .WithMany()
-                .HasForeignKey(gm => gm.EmployeeId)
+                .HasForeignKey(gm => gm.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Unique constraint for GroupMember (one employee per group)
+            // Unique constraint for GroupMember (one user per group)
             modelBuilder.Entity<GroupMember>()
-                .HasIndex(gm => new { gm.GroupId, gm.EmployeeId })
+                .HasIndex(gm => new { gm.GroupId, gm.UserId })
                 .IsUnique();
 
             // SharedFile relationships
@@ -204,7 +200,7 @@ namespace StaffManagementSystem.DbContexts
                 .HasIndex(g => g.Status);
 
             modelBuilder.Entity<GroupMember>()
-                .HasIndex(gm => gm.EmployeeId);
+                .HasIndex(gm => gm.UserId);
 
             modelBuilder.Entity<SharedFile>()
                 .HasIndex(sf => sf.UploaderId);

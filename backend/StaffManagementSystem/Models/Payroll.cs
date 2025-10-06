@@ -10,10 +10,10 @@ namespace StaffManagementSystem.Models
 
         [Required]
         [StringLength(255)]
-        public string EmployeeId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
 
-        [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; } = null!;
+        [ForeignKey("UserId")]
+        public virtual User User { get; set; } = null!;
 
         [Required]
         public DateTime PayPeriodStart { get; set; }

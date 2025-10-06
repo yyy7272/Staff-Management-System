@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StaffManagementSystem.Models
@@ -78,7 +78,7 @@ namespace StaffManagementSystem.Models
         Welcome = 7,
         PasswordReset = 8,
         Security = 9,
-        Employee = 10,
+        User = 10,
         Department = 11,
         Collaboration = 12
     }

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StaffManagementSystem.Models
@@ -17,7 +17,7 @@ namespace StaffManagementSystem.Models
         public string SharedById { get; set; } = string.Empty;
 
         [ForeignKey("SharedWith")]
-        public string? SharedWithId { get; set; } // Individual employee
+        public string? SharedWithId { get; set; } // Individual User
 
         [ForeignKey("SharedWithGroup")]
         public string? SharedWithGroupId { get; set; } // Group
@@ -26,7 +26,7 @@ namespace StaffManagementSystem.Models
         public string? SharedWithDepartmentId { get; set; } // Department
 
         [StringLength(20)]
-        public string ShareType { get; set; } = "employee"; // employee, group, department, company
+        public string ShareType { get; set; } = "User"; // User, group, department, company
 
         [StringLength(20)]
         public string Permission { get; set; } = "view"; // view, download, edit
@@ -45,8 +45,8 @@ namespace StaffManagementSystem.Models
 
         // Navigation properties
         public SharedFile? SharedFile { get; set; }
-        public Employee? SharedBy { get; set; }
-        public Employee? SharedWith { get; set; }
+        public User? SharedBy { get; set; }
+        public User? SharedWith { get; set; }
         public Group? SharedWithGroup { get; set; }
         public Department? SharedWithDepartment { get; set; }
 

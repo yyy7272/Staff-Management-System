@@ -1,4 +1,4 @@
-using StaffManagementSystem.DbContexts;
+﻿using StaffManagementSystem.DbContexts;
 using StaffManagementSystem.Models;
 using StaffManagementSystem.DataTransferObj;
 using Microsoft.EntityFrameworkCore;
@@ -40,12 +40,16 @@ namespace StaffManagementSystem.Services
                 }
             }
 
+            // Parse enum values
+            NotificationType notificationType = Enum.TryParse<NotificationType>(type, true, out var parsedType) ? parsedType : NotificationType.Info;
+            NotificationPriority notificationPriority = Enum.TryParse<NotificationPriority>(priority, true, out var parsedPriority) ? parsedPriority : NotificationPriority.Normal;
+
             var notification = new Notification
             {
-                Type = type,
+                Type = notificationType,
                 Title = title,
-                Description = description,
-                Priority = priority,
+                Message = description,
+                Priority = notificationPriority,
                 EntityType = entityType,
                 EntityId = entityId,
                 UserId = userId,
@@ -495,16 +499,16 @@ namespace StaffManagementSystem.Services
             return await CreateNotificationAsync(dto);
         }
 
-        public async Task<NotificationDto> CreateEmployeeCreatedNotificationAsync(string userId, string employeeName, string triggerUserName)
+        public async Task<NotificationDto> CreateEmployeeCreatedNotificationAsync(string userId, string UserName, string triggerUserName)
         {
             var dto = new CreateNotificationDto
             {
                 UserId = userId,
-                Title = "New Employee Added",
-                Message = $"A new employee {employeeName} has been added to the system by {triggerUserName}",
-                Type = NotificationType.Employee,
+                Title = "New User Added",
+                Message = $"A new User {UserName} has been added to the system by {triggerUserName}",
+                Type = NotificationType.User,
                 Priority = NotificationPriority.Normal,
-                EntityType = "Employee",
+                EntityType = "User",
                 TriggeredByUserName = triggerUserName
             };
 

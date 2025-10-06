@@ -30,12 +30,12 @@ namespace StaffManagementSystem.Models
         [ForeignKey("Applicant")]
         public string ApplicantId { get; set; }
 
-        public Employee? Applicant { get; set; }
+        public User? Applicant { get; set; }
 
         [ForeignKey("Approver")]
         public string? ApproverId { get; set; }
 
-        public Employee? Approver { get; set; }
+        public User? Approver { get; set; }
 
         [ForeignKey("Department")]
         public string? DepartmentId { get; set; }

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StaffManagementSystem.Models
@@ -10,7 +10,7 @@ namespace StaffManagementSystem.Models
 
         [Required]
         [StringLength(100)]
-        public string Type { get; set; } = string.Empty; // "employee", "department", "approval", "user"
+        public string Type { get; set; } = string.Empty; // "User", "department", "approval", "user"
 
         [Required]
         [StringLength(100)]

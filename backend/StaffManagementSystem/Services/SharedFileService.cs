@@ -1,4 +1,4 @@
-using StaffManagementSystem.DbContexts;
+﻿using StaffManagementSystem.DbContexts;
 using StaffManagementSystem.Models;
 using StaffManagementSystem.DataTransferObj;
 using Microsoft.EntityFrameworkCore;
@@ -251,8 +251,8 @@ namespace StaffManagementSystem.Services
             // Set the appropriate target based on share type
             switch (dto.ShareType.ToLower())
             {
-                case "employee":
-                    fileShare.SharedWithId = dto.EmployeeId;
+                case "user":
+                    fileShare.SharedWithId = dto.UserId;
                     break;
                 case "group":
                     fileShare.SharedWithGroupId = dto.GroupId;
@@ -367,15 +367,15 @@ namespace StaffManagementSystem.Services
             switch (file.ShareType.ToLower())
             {
                 case "company":
-                    return true; // All employees can access
+                    return true; // All Users can access
 
                 case "group":
-                    if (file.Group?.Members.Any(m => m.EmployeeId == currentUserId && m.Status == "active") == true)
+                    if (file.Group?.Members.Any(m => m.UserId == currentUserId && m.Status == "active") == true)
                         return true;
                     break;
 
                 case "department":
-                    var user = await _context.Employees.FirstOrDefaultAsync(e => e.Id == currentUserId);
+                    var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == currentUserId);
                     // For department sharing, we'd need to implement department-based access
                     break;
             }

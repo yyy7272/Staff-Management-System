@@ -29,8 +29,8 @@ namespace StaffManagementSystem.Models
 
         public DateTime? UpdatedAt { get; set; }
 
-        // Navigation property (1:N) - References Employees
-        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        // Navigation property (1:N) - References Users
+        public ICollection<User> Users { get; set; } = new List<User>();
 
         public Department()
         {

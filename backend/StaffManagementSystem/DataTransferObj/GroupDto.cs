@@ -47,11 +47,11 @@ namespace StaffManagementSystem.DataTransferObj
     public class GroupMemberDto
     {
         public string Id { get; set; } = string.Empty;
-        public string EmployeeId { get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
-        public string EmployeeEmail { get; set; } = string.Empty;
-        public string EmployeePosition { get; set; } = string.Empty;
-        public string? EmployeeAvatar { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
+        public string UserPosition { get; set; } = string.Empty;
+        public string? UserAvatar { get; set; }
         public string Role { get; set; } = "member";
         public string Status { get; set; } = "active";
         public DateTime JoinedAt { get; set; }
@@ -59,7 +59,7 @@ namespace StaffManagementSystem.DataTransferObj
 
     public class AddGroupMemberDto
     {
-        public string EmployeeId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         public string Role { get; set; } = "member";
     }
 

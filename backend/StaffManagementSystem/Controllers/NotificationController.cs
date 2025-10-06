@@ -139,12 +139,7 @@ namespace StaffManagementSystem.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                var success = await _notificationService.MarkAsReadAsync(id, currentUserId);
-                
-                if (!success)
-                {
-                    return NotFound(new { message = "Notification not found or already read" });
-                }
+                await _notificationService.MarkAsReadAsync(id, currentUserId);
 
                 return Ok(new { message = "Notification marked as read" });
             }
@@ -194,7 +189,7 @@ namespace StaffManagementSystem.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                var success = await _notificationService.MarkAllAsReadAsync(currentUserId);
+                await _notificationService.MarkAllAsReadAsync(currentUserId);
                 return Ok(new { message = "All notifications marked as read" });
             }
             catch (UnauthorizedAccessException)
@@ -215,8 +210,8 @@ namespace StaffManagementSystem.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                var success = await _notificationService.MarkAllAsReadAsync(currentUserId);
-                return Ok(new { message = "All notifications marked as read", success });
+                await _notificationService.MarkAllAsReadAsync(currentUserId);
+                return Ok(new { message = "All notifications marked as read", success = true });
             }
             catch (UnauthorizedAccessException)
             {

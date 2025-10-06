@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StaffManagementSystem.Models
@@ -43,7 +43,7 @@ namespace StaffManagementSystem.Models
         public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
-        public Employee? Creator { get; set; }
+        public User? Creator { get; set; }
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<SharedFile> SharedFiles { get; set; } = new List<SharedFile>();
 

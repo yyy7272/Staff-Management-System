@@ -1,4 +1,4 @@
-using StaffManagementSystem.DbContexts;
+﻿using StaffManagementSystem.DbContexts;
 using StaffManagementSystem.Models;
 using StaffManagementSystem.DataTransferObj;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,7 @@ namespace StaffManagementSystem.Services
             var group = await _context.Groups
                 .Include(g => g.Creator)
                 .Include(g => g.Members)
-                    .ThenInclude(m => m.Employee)
+                    .ThenInclude(m => m.User)
                 .FirstOrDefaultAsync(g => g.Id == id && g.Status == "active");
 
             if (group == null) return null;
@@ -38,7 +38,7 @@ namespace StaffManagementSystem.Services
             var query = _context.Groups
                 .Include(g => g.Creator)
                 .Include(g => g.Members)
-                    .ThenInclude(m => m.Employee)
+                    .ThenInclude(m => m.User)
                 .Where(g => g.Status == "active");
 
             // Filter by type
@@ -49,7 +49,7 @@ namespace StaffManagementSystem.Services
             query = query.Where(g =>
                 g.Visibility == "public" ||
                 g.CreatorId == currentUserId ||
-                g.Members.Any(m => m.EmployeeId == currentUserId && m.Status == "active"));
+                g.Members.Any(m => m.UserId == currentUserId && m.Status == "active"));
 
             if (!string.IsNullOrEmpty(visibility))
                 query = query.Where(g => g.Visibility == visibility);
@@ -86,7 +86,7 @@ namespace StaffManagementSystem.Services
             var creatorMember = new GroupMember
             {
                 GroupId = group.Id,
-                EmployeeId = currentUserId,
+                UserId = currentUserId,
                 Role = "admin",
                 Status = "active",
                 JoinedAt = DateTime.UtcNow
@@ -102,7 +102,7 @@ namespace StaffManagementSystem.Services
                     var member = new GroupMember
                     {
                         GroupId = group.Id,
-                        EmployeeId = memberId,
+                        UserId = memberId,
                         Role = "member",
                         Status = "active",
                         JoinedAt = DateTime.UtcNow
@@ -177,7 +177,7 @@ namespace StaffManagementSystem.Services
             if (group == null) return false;
 
             // Check if member already exists
-            if (group.Members.Any(m => m.EmployeeId == dto.EmployeeId))
+            if (group.Members.Any(m => m.UserId == dto.UserId))
                 return false;
 
             // Check max members limit
@@ -187,7 +187,7 @@ namespace StaffManagementSystem.Services
             var member = new GroupMember
             {
                 GroupId = groupId,
-                EmployeeId = dto.EmployeeId,
+                UserId = dto.UserId,
                 Role = dto.Role,
                 Status = "active",
                 JoinedAt = DateTime.UtcNow
@@ -205,7 +205,7 @@ namespace StaffManagementSystem.Services
                 return false;
 
             var member = await _context.GroupMembers
-                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.EmployeeId == memberId);
+                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == memberId);
 
             if (member == null) return false;
 
@@ -226,7 +226,7 @@ namespace StaffManagementSystem.Services
                 return false;
 
             var member = await _context.GroupMembers
-                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.EmployeeId == memberId);
+                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == memberId);
 
             if (member == null) return false;
 
@@ -244,7 +244,7 @@ namespace StaffManagementSystem.Services
                 return new List<GroupMemberDto>();
 
             var members = await _context.GroupMembers
-                .Include(m => m.Employee)
+                .Include(m => m.User)
                 .Where(m => m.GroupId == groupId && m.Status == "active")
                 .OrderBy(m => m.Role == "admin" ? 0 : m.Role == "moderator" ? 1 : 2)
                 .ThenBy(m => m.JoinedAt)
@@ -253,11 +253,11 @@ namespace StaffManagementSystem.Services
             return members.Select(m => new GroupMemberDto
             {
                 Id = m.Id,
-                EmployeeId = m.EmployeeId,
-                EmployeeName = m.Employee?.Name ?? "Unknown",
-                EmployeeEmail = m.Employee?.Email ?? "",
-                EmployeePosition = m.Employee?.Position ?? "",
-                EmployeeAvatar = m.Employee?.ProfileImageUrl,
+                UserId = m.UserId,
+                UserName = m.User?.Name ?? "Unknown",
+                UserEmail = m.User?.Email ?? "",
+                UserPosition = m.User?.Position ?? "",
+                UserAvatar = m.User?.ProfileImageUrl,
                 Role = m.Role,
                 Status = m.Status,
                 JoinedAt = m.JoinedAt
@@ -272,21 +272,21 @@ namespace StaffManagementSystem.Services
         public async Task<List<GroupDto>> GetDepartmentGroupsAsync(string departmentId, string currentUserId)
         {
             // Get user's department
-            var user = await _context.Employees.FirstOrDefaultAsync(e => e.Id == currentUserId);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == currentUserId);
             if (user?.DepartmentId != departmentId) return new List<GroupDto>();
 
             var groups = await _context.Groups
                 .Include(g => g.Creator)
                 .Include(g => g.Members)
-                    .ThenInclude(m => m.Employee)
+                    .ThenInclude(m => m.User)
                 .Where(g => g.Status == "active" && g.Type == "department")
                 .ToListAsync();
 
             // Filter groups that belong to the same department
             var departmentGroups = groups.Where(g =>
                 g.Members.Any(m =>
-                    m.Employee != null &&
-                    m.Employee.DepartmentId == departmentId &&
+                    m.User != null &&
+                    m.User.DepartmentId == departmentId &&
                     m.Status == "active")).ToList();
 
             var result = new List<GroupDto>();
@@ -307,7 +307,7 @@ namespace StaffManagementSystem.Services
             if (group == null || group.Visibility != "public") return false;
 
             // Check if already a member
-            if (group.Members.Any(m => m.EmployeeId == currentUserId))
+            if (group.Members.Any(m => m.UserId == currentUserId))
                 return false;
 
             // Check max members limit
@@ -317,7 +317,7 @@ namespace StaffManagementSystem.Services
             var member = new GroupMember
             {
                 GroupId = groupId,
-                EmployeeId = currentUserId,
+                UserId = currentUserId,
                 Role = "member",
                 Status = "active",
                 JoinedAt = DateTime.UtcNow
@@ -332,7 +332,7 @@ namespace StaffManagementSystem.Services
         public async Task<bool> LeaveGroupAsync(string groupId, string currentUserId)
         {
             var member = await _context.GroupMembers
-                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.EmployeeId == currentUserId);
+                .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == currentUserId);
 
             if (member == null) return false;
 
@@ -374,8 +374,8 @@ namespace StaffManagementSystem.Services
                 .Include(m => m.Group)
                     .ThenInclude(g => g.Creator)
                 .Include(m => m.Group.Members)
-                    .ThenInclude(gm => gm.Employee)
-                .Where(m => m.EmployeeId == currentUserId && m.Status == "active")
+                    .ThenInclude(gm => gm.User)
+                .Where(m => m.UserId == currentUserId && m.Status == "active")
                 .Select(m => m.Group)
                 .Where(g => g.Status == "active")
                 .OrderByDescending(g => g.CreatedAt)
@@ -405,7 +405,7 @@ namespace StaffManagementSystem.Services
             if (group.CreatorId == currentUserId) return true;
 
             // Members have access
-            return group.Members.Any(m => m.EmployeeId == currentUserId && m.Status == "active");
+            return group.Members.Any(m => m.UserId == currentUserId && m.Status == "active");
         }
 
         public async Task<bool> CanUserManageGroupAsync(string groupId, string currentUserId)
@@ -420,13 +420,13 @@ namespace StaffManagementSystem.Services
             if (group.CreatorId == currentUserId) return true;
 
             // Admin members can manage
-            var member = group.Members.FirstOrDefault(m => m.EmployeeId == currentUserId && m.Status == "active");
+            var member = group.Members.FirstOrDefault(m => m.UserId == currentUserId && m.Status == "active");
             return member?.Role == "admin" || member?.Role == "moderator";
         }
 
         private async Task<GroupDto> MapToGroupDtoAsync(Group group, string currentUserId)
         {
-            var userMember = group.Members.FirstOrDefault(m => m.EmployeeId == currentUserId && m.Status == "active");
+            var userMember = group.Members.FirstOrDefault(m => m.UserId == currentUserId && m.Status == "active");
 
             return new GroupDto
             {
@@ -448,11 +448,11 @@ namespace StaffManagementSystem.Services
                 Members = group.Members.Where(m => m.Status == "active").Select(m => new GroupMemberDto
                 {
                     Id = m.Id,
-                    EmployeeId = m.EmployeeId,
-                    EmployeeName = m.Employee?.Name ?? "Unknown",
-                    EmployeeEmail = m.Employee?.Email ?? "",
-                    EmployeePosition = m.Employee?.Position ?? "",
-                    EmployeeAvatar = m.Employee?.ProfileImageUrl,
+                    UserId = m.UserId,
+                    UserName = m.User?.Name ?? "Unknown",
+                    UserEmail = m.User?.Email ?? "",
+                    UserPosition = m.User?.Position ?? "",
+                    UserAvatar = m.User?.ProfileImageUrl,
                     Role = m.Role,
                     Status = m.Status,
                     JoinedAt = m.JoinedAt

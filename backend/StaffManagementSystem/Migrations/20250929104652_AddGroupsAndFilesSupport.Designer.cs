@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StaffManagementSystem.DbContexts;
 
@@ -11,9 +12,11 @@ using StaffManagementSystem.DbContexts;
 namespace StaffManagementSystem.Migrations
 {
     [DbContext(typeof(StaffDbContext))]
-    partial class StaffDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929104652_AddGroupsAndFilesSupport")]
+    partial class AddGroupsAndFilesSupport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,6 +179,79 @@ namespace StaffManagementSystem.Migrations
                     b.HasIndex("ParentDepartmentId");
 
                     b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("StaffManagementSystem.Models.Employee", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DepartmentId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("HireDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Position")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ProfileImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal?>("Salary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("ThumbnailImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ThumbnailImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("StaffManagementSystem.Models.FileShare", b =>
@@ -371,6 +447,10 @@ namespace StaffManagementSystem.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("GroupId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -392,15 +472,11 @@ namespace StaffManagementSystem.Migrations
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("GroupId", "UserId")
+                    b.HasIndex("GroupId", "EmployeeId")
                         .IsUnique();
 
                     b.ToTable("GroupMembers");
@@ -498,6 +574,11 @@ namespace StaffManagementSystem.Migrations
                     b.Property<decimal>("Deductions")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<decimal>("NetPay")
                         .HasColumnType("decimal(10,2)");
 
@@ -533,14 +614,9 @@ namespace StaffManagementSystem.Migrations
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("EmployeeId");
 
                     b.ToTable("Payrolls");
                 });
@@ -633,11 +709,10 @@ namespace StaffManagementSystem.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
                     b.Property<bool>("CanAccessApprovals")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("CanAccessEmployees")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("CanAccessOrganization")
@@ -649,10 +724,10 @@ namespace StaffManagementSystem.Migrations
                     b.Property<bool>("CanAccessPermissions")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("CanAccessUsers")
+                    b.Property<bool>("CanManageApprovals")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<bool>("CanManageApprovals")
+                    b.Property<bool>("CanManageEmployees")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("CanManageOrganization")
@@ -669,9 +744,6 @@ namespace StaffManagementSystem.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("DepartmentId")
-                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -693,9 +765,6 @@ namespace StaffManagementSystem.Migrations
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
-
-                    b.Property<DateTime?>("HireDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsAccountLocked")
                         .HasColumnType("tinyint(1)");
@@ -730,38 +799,6 @@ namespace StaffManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("longblob");
 
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("Position")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("ProfileImagePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("ProfileImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<decimal?>("Salary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("ThumbnailImagePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("ThumbnailImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("datetime(6)");
@@ -772,8 +809,6 @@ namespace StaffManagementSystem.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -786,13 +821,13 @@ namespace StaffManagementSystem.Migrations
 
             modelBuilder.Entity("StaffManagementSystem.Models.Approval", b =>
                 {
-                    b.HasOne("StaffManagementSystem.Models.User", "Applicant")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Applicant")
                         .WithMany("ApplicantApprovals")
                         .HasForeignKey("ApplicantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("StaffManagementSystem.Models.User", "Approver")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Approver")
                         .WithMany("ApproverApprovals")
                         .HasForeignKey("ApproverId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -819,6 +854,17 @@ namespace StaffManagementSystem.Migrations
                     b.Navigation("ParentDepartment");
                 });
 
+            modelBuilder.Entity("StaffManagementSystem.Models.Employee", b =>
+                {
+                    b.HasOne("StaffManagementSystem.Models.Department", "Department")
+                        .WithMany("Employees")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("StaffManagementSystem.Models.FileShare", b =>
                 {
                     b.HasOne("StaffManagementSystem.Models.SharedFile", "SharedFile")
@@ -827,7 +873,7 @@ namespace StaffManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StaffManagementSystem.Models.User", "SharedBy")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "SharedBy")
                         .WithMany()
                         .HasForeignKey("SharedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -843,7 +889,7 @@ namespace StaffManagementSystem.Migrations
                         .HasForeignKey("SharedWithGroupId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("StaffManagementSystem.Models.User", "SharedWith")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "SharedWith")
                         .WithMany()
                         .HasForeignKey("SharedWithId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -867,7 +913,7 @@ namespace StaffManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StaffManagementSystem.Models.User", "UploadedBy")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "UploadedBy")
                         .WithMany()
                         .HasForeignKey("UploadedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -880,7 +926,7 @@ namespace StaffManagementSystem.Migrations
 
             modelBuilder.Entity("StaffManagementSystem.Models.Group", b =>
                 {
-                    b.HasOne("StaffManagementSystem.Models.User", "Creator")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -891,21 +937,21 @@ namespace StaffManagementSystem.Migrations
 
             modelBuilder.Entity("StaffManagementSystem.Models.GroupMember", b =>
                 {
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StaffManagementSystem.Models.Group", "Group")
                         .WithMany("Members")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StaffManagementSystem.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Employee");
 
                     b.Navigation("Group");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StaffManagementSystem.Models.Notification", b =>
@@ -921,13 +967,13 @@ namespace StaffManagementSystem.Migrations
 
             modelBuilder.Entity("StaffManagementSystem.Models.Payroll", b =>
                 {
-                    b.HasOne("StaffManagementSystem.Models.User", "User")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Employee")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("StaffManagementSystem.Models.SharedFile", b =>
@@ -937,7 +983,7 @@ namespace StaffManagementSystem.Migrations
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("StaffManagementSystem.Models.User", "Uploader")
+                    b.HasOne("StaffManagementSystem.Models.Employee", "Uploader")
                         .WithMany()
                         .HasForeignKey("UploaderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -948,21 +994,18 @@ namespace StaffManagementSystem.Migrations
                     b.Navigation("Uploader");
                 });
 
-            modelBuilder.Entity("StaffManagementSystem.Models.User", b =>
-                {
-                    b.HasOne("StaffManagementSystem.Models.Department", "Department")
-                        .WithMany("Users")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Department");
-                });
-
             modelBuilder.Entity("StaffManagementSystem.Models.Department", b =>
                 {
-                    b.Navigation("SubDepartments");
+                    b.Navigation("Employees");
 
-                    b.Navigation("Users");
+                    b.Navigation("SubDepartments");
+                });
+
+            modelBuilder.Entity("StaffManagementSystem.Models.Employee", b =>
+                {
+                    b.Navigation("ApplicantApprovals");
+
+                    b.Navigation("ApproverApprovals");
                 });
 
             modelBuilder.Entity("StaffManagementSystem.Models.Group", b =>
@@ -977,13 +1020,6 @@ namespace StaffManagementSystem.Migrations
                     b.Navigation("FileShares");
 
                     b.Navigation("Versions");
-                });
-
-            modelBuilder.Entity("StaffManagementSystem.Models.User", b =>
-                {
-                    b.Navigation("ApplicantApprovals");
-
-                    b.Navigation("ApproverApprovals");
                 });
 #pragma warning restore 612, 618
         }

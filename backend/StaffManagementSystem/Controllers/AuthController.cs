@@ -19,13 +19,15 @@ namespace StaffManagementSystem.Controllers
         private readonly IConfiguration _config;
         private readonly IEmailService _emailService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IImageProcessingService _imageProcessingService;
 
-        public AuthController(StaffDbContext context, IConfiguration config, IEmailService emailService, ILogger<AuthController> logger)
+        public AuthController(StaffDbContext context, IConfiguration config, IEmailService emailService, ILogger<AuthController> logger, IImageProcessingService imageProcessingService)
         {
             _context = context;
             _config = config;
             _emailService = emailService;
             _logger = logger;
+            _imageProcessingService = imageProcessingService;
         }
 
         [HttpPost("register")]
@@ -157,7 +159,9 @@ namespace StaffManagementSystem.Controllers
                     lastName = user.LastName,
                     isAdministrator = user.IsAdministrator,
                     canManageUsers = user.CanManageUsers,
-                    canManageRoles = user.CanManageRoles
+                    canManageRoles = user.CanManageRoles,
+                    profileImageUrl = user.ProfileImageUrl,
+                    thumbnailImageUrl = user.ThumbnailImageUrl
                 }
             });
         }
@@ -414,8 +418,112 @@ namespace StaffManagementSystem.Controllers
             });
         }
 
+        [HttpPost("avatar")]
+        [Authorize]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            try
+            {
+                // Delete existing avatar if any
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    await _imageProcessingService.DeleteAvatarAsync(user.ProfileImagePath);
+                }
+
+                // Process and save new avatar
+                var (originalPath, thumbnailPath) = await _imageProcessingService.ProcessAvatarAsync(file, userId);
+
+                // Generate URLs for the images
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var originalUrl = $"{baseUrl}/uploads/avatars/{Path.GetFileName(originalPath)}";
+                var thumbnailUrl = $"{baseUrl}/uploads/avatars/{Path.GetFileName(thumbnailPath)}";
+
+                // Update user record
+                user.ProfileImagePath = originalPath;
+                user.ProfileImageUrl = originalUrl;
+                user.ThumbnailImagePath = thumbnailPath;
+                user.ThumbnailImageUrl = thumbnailUrl;
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Avatar uploaded successfully for user: {Username}", user.Username);
+
+                return Ok(new
+                {
+                    profileImageUrl = originalUrl,
+                    thumbnailImageUrl = thumbnailUrl,
+                    message = "Avatar uploaded successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading avatar for user: {Username}", user.Username);
+                return StatusCode(500, "Error uploading avatar: " + ex.Message);
+            }
+        }
+
+        [HttpDelete("avatar")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAvatar()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    await _imageProcessingService.DeleteAvatarAsync(user.ProfileImagePath);
+
+                    user.ProfileImagePath = null;
+                    user.ProfileImageUrl = null;
+                    user.ThumbnailImagePath = null;
+                    user.ThumbnailImageUrl = null;
+                    user.UpdatedAt = DateTime.UtcNow;
+
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Avatar deleted successfully for user: {Username}", user.Username);
+                }
+
+                return Ok(new { message = "Avatar deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting avatar for user: {Username}", user.Username);
+                return StatusCode(500, "Error deleting avatar: " + ex.Message);
+            }
+        }
+
         // Utility methods
-        
+
 
         private string CreateJwtToken(User user)
         {
